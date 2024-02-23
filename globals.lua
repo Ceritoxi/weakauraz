@@ -1,5 +1,8 @@
 _G.COMBAT_LOG_EVENT_UNFILTERED = ""
 _G.UNIT_POWER_FREQUENT = ""
+_G.UNIT_AURA = ""
+_G.UNIT_TARGET = ""
+_G.PLAYER_TARGET_CHANGED = ""
 _G.GetSpellCritChance = function(school)
 end
 _G.GetTime = function()
@@ -12,3 +15,10 @@ _G.UnitSpellHaste = function(unit)
 end
 _G.GetSpellBonusDamage = function(school)
 end
+_G.UnitGUID = function(unit)
+end
+_G.aura_env = {
+    config = {},
+    state = {}
+}
+
