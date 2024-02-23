@@ -17,6 +17,20 @@ _G.GetSpellBonusDamage = function(school)
 end
 _G.UnitGUID = function(unit)
 end
+_G.GetCritChance = function(unit)
+end
+_G.UnitAttackPower = function(unit)
+    return "", "", ""
+end
+_G.GetSpecialization = function()
+    return ""
+end
+_G.GetMastery = function()
+    return ""
+end
+_G.GetSpecializationInfo = function(spec)
+    return ""
+end
 _G.aura_env = {
     config = {},
     state = {}

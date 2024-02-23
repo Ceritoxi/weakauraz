@@ -1,4 +1,4 @@
 - real optional multitarget
 - extend for hots
-- extend for bleeds (no haste, based on ap)
 - optional default icon
+- calculate dmg eventbased (not every frame)

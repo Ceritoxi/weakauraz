@@ -12,8 +12,7 @@ local dountrigger = function()
 end
 
 local durationtrigger = function()
-    local _, _, _, _, _, duration, expirationTime = UnitAura("target", aura_env.dots[aura_env.config.dot].name, nil,
-        "PLAYER|HARMFUL")
+    local _, _, _, _, _, duration, expirationTime = UnitAura("target", aura_env.dots[aura_env.config.dot].name, nil, "PLAYER|HARMFUL")
     return duration, expirationTime
 end
 
