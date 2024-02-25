@@ -28,6 +28,9 @@ end
 _G.GetMastery = function()
     return ""
 end
+_G.UnitClass = function(player)
+    return "", "", ""
+end
 _G.GetSpecializationInfo = function(spec)
     return ""
 end

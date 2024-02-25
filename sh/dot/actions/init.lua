@@ -1,119 +1,109 @@
 local function Round(number)
     return math.floor(number + 0.5)
 end
+local spec = GetSpecialization()
+local _, _, class = UnitClass("player")
 
-local dmgMods = {
-    shadowform = {
-        rawMod = function()
-            if UnitAura("player", "Shadowform") then
-                return 1.25
-            else
-                return 1
-            end
+local generalDamageMods = {
+    trick = function()
+        if UnitAura("player", "Tricks of the Trade") then
+            return 1.15
+        else
+            return 1
         end
-    },
-    twist = {
-        rawMod = function()
-            if UnitAura("player", "Twist of Fate") then
-                return 1.15
-            else
-                return 1
-            end
+    end,
+    jinrokfluid = function()
+        if UnitAura("player", "Fluidity") then
+            return 1.4
+        else
+            return 1
         end
-    },
-    unholy = {
-        rawMod = function(spellName)
-            local spec = GetSpecialization()
-            if spec > 0 then
-                local _, _, _, texture = _G.GetSpecializationInfo(spec)
-                if texture == "Interface\\Icons\\Spell_Deathknight_UnholyPresence" then
-                    if spellName == "Blood Plague" then
-                        return (1 + (2.5 * GetMastery() / 100)) * 1.6
-                    elseif spellName == "Frost Fever" then
-                        return 1.6
+    end,
+    fearless = function()
+        if UnitAura("player", "Fearless") then
+            return 1.6
+        else
+            return 1
+        end
+    end,
+    jikunfood = function()
+        if UnitAura("player", "Primal Nutriment") then
+            local _, _, _, stack = UnitAura("player", "Primal Nutriment")
+            return 2 + (stack and (stack - 1) * 0.1 or 0)
+        else
+            return 1
+        end
+    end,
+    crit = function(spellSchool, isSpellPowerBased)
+        return isSpellPowerBased and (1 + GetSpellCritChance(spellSchool) / 100) or (1 + GetCritChance() / 100)
+    end
+
+}
+
+local specificDmgMods = {
+    [5] = { -- Priest
+        buffs = {
+            pi = function()
+                if UnitAura("player", "Power Infusion") then
+                    return 1.05
+                else
+                    return 1
+                end
+            end,
+            twist = function()
+                if UnitAura("player", "Twist of Fate") then
+                    return 1.15
+                else
+                    return 1
+                end
+            end
+        },
+        [3] = { -- Shadow
+            buffs = {
+                shadowform = function()
+                    if UnitAura("player", "Shadowform") then
+                        return 1.25
+                    else
+                        return 1
                     end
                 end
-            else
-                return 1
-            end
-        end
+            }
+        }
     },
-    frost = {
-        rawMod = function(spellName)
-            local spec = GetSpecialization()
-            if spellName == "Frost Fever" and spec > 0 then
-                local _, _, _, texture = _G.GetSpecializationInfo(spec)
-                if texture == "Interface\\Icons\\Spell_Deathknight_FrostPresence" then
-                    return 1 + (2.0 * GetMastery() / 100)
-                end
-            else
-                return 1
-            end
-
-        end
-    },
-    pi = {
-        rawMod = function()
-            if UnitAura("player", "Twist of Fate") then
-                return 1.05
-            else
-                return 1
-            end
-        end
-    },
-    trick = {
-        rawMod = function()
-            if UnitAura("player", "Tricks of the Trade") then
-                return 1.15
-            else
-                return 1
-            end
-        end
-    },
-    jinrokfluid = {
-        rawMod = function()
-            if UnitAura("player", "Fluidity") then
-                return 1.4
-            else
-                return 1
-            end
-        end
-    },
-    fearless = {
-        rawMod = function()
-            if UnitAura("player", "Fearless") then
-                return 1.6
-            else
-                return 1
-            end
-        end
-    },
-    jikunfood = {
-        rawMod = function()
-            if UnitAura("player", "Primal Nutriment") then
-                local _, _, _, stack = UnitAura("player", "Primal Nutriment")
-                return 2 + (stack and (stack - 1) * 0.1 or 0)
-            else
-                return 1
-            end
-        end
-    },
-    crit = {
-        rngMod = function(spellSchool, isSpellPowerBased)
-            return isSpellPowerBased and (1 + GetSpellCritChance(spellSchool) / 100) or (1 + GetCritChance() / 100)
-        end
+    [6] = { -- Death Knight
+        [2] = { -- Frost
+            ["Frost Fever"] = 1 + (2.0 * GetMastery() / 100)
+        },
+        [3] = { -- Unholy
+            ["Blood Plague"] = (1 + (2.5 * GetMastery() / 100)) * 1.6,
+            ["Frost Fever"] = 1.6
+        }
     }
 }
 
+local function getSpecificDmgMod(spellName)
+    local aggregate = 1;
+    if specificDmgMods[class] then
+        for _, dmgMod in pairs(specificDmgMods[class].buffs) do
+            aggregate = aggregate * dmgMod()
+        end
+        if specificDmgMods[class][spec] then
+            for _, dmgMod in pairs(specificDmgMods[class][spec].buffs) do
+                aggregate = aggregate * dmgMod()
+            end
+            aggregate = aggregate * (specificDmgMods[class][spec][spellName] or 1)
+        end
+    end
+    return aggregate
+end
+
 local function aggregateDmgMods(spellSchool, isSpellPowerBased, spellName)
     local aggregate = 1;
-    local rawAggregate = 1;
-    for _, dmgMod in pairs(dmgMods) do
-        rawAggregate = rawAggregate * (dmgMod.rawMod ~= nil and dmgMod.rawMod(spellName) or 1)
-        aggregate = aggregate * (dmgMod.rngMod ~= nil and dmgMod.rngMod(spellSchool, isSpellPowerBased) or 1)
+    for _, dmgMod in pairs(generalDamageMods) do
+        aggregate = aggregate * dmgMod(spellSchool, isSpellPowerBased)
     end
-    aggregate = aggregate * rawAggregate
-    return aggregate, rawAggregate
+    aggregate = aggregate * getSpecificDmgMod(spellName)
+    return aggregate
 end
 
 aura_env.dots = {
@@ -171,7 +161,7 @@ aura_env.calculateDps = function(dot)
     local isSpellPowerBased = dots[dot].isSpellPowerBased
     local power, positive, negative = dots[dot].isSpellPowerBased and GetSpellBonusDamage(dots[dot].school) or UnitAttackPower("player")
     power = power + (positive or 0) + (negative or 0)
-    local damageBonus, rawDmgBonus = aggregateDmgMods(dots[dot].school, isSpellPowerBased, dots[dot].name)
+    local damageBonus = aggregateDmgMods(dots[dot].school, isSpellPowerBased, dots[dot].name)
     local damage = 0
     local duration = 1
     if dots[dot].isHasteBased then

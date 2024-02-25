@@ -2,3 +2,4 @@
 - extend for hots
 - optional default icon
 - calculate dmg eventbased (not every frame)
+- use spellids so jajas dont catch fire
