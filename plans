@@ -1,6 +1,37 @@
 - use state.GUID (its fucky)
-- real optional multitarget
+- real optional multitarget -> STATE TRIGGER !!!!!!!!!!!!!!!!!!!!!!
 - extend for hots
 - optional default icon
 - calculate dmg eventbased (not every frame)
 - use spellids so jajas dont catch fire
+
+Toes
+
+- Lei
+  - use WA_IterateGroupMembers(reversed, forceParty)
+
+TOT
+
+- Animus
+  - Who is furthest from matterswap
+  - Consort clump
+- Lei
+
+  - ball clump check
+  - static shock clump check
+  - turn down bigwigs crashing thunder warning its stupid, make it a wa
+
+- Raden
+  - fix wa -- kindaworks
+  - automake
+
+Legion
+
+Fix Plater to show cast target
+
+Prot
+Consec - at cast save position to use - show uptime - show if consec buff is up
+Sotr - show available stacks/cd - show uptime
+Defs - simple icons
+
+Holy - Show Maraad - Show LoD
