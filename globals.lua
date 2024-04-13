@@ -19,6 +19,8 @@ _G.UnitName = function(unit)
 end
 _G.UnitAura = function(unit, name, rank, filter)
 end
+_G.UnitBuff = function(unit, name, rank, filter)
+end
 _G.UnitDebuff = function(unit, name, rank, filter)
 end
 _G.UnitSpellHaste = function(unit)

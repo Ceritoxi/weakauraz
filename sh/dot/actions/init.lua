@@ -72,11 +72,47 @@ local specificDmgMods = {
     },
     [6] = { -- Death Knight
         [2] = { -- Frost
-            ["Frost Fever"] = 1 + (2.0 * GetMastery() / 100)
+            ["Frost Fever"] = function()
+                return 1 + (2.0 * GetMastery() / 100)
+            end
         },
         [3] = { -- Unholy
-            ["Blood Plague"] = (1 + (2.5 * GetMastery() / 100)) * 1.6,
-            ["Frost Fever"] = 1.6
+            ["Blood Plague"] = function()
+                return (1 + (2.5 * GetMastery() / 100)) * 1.6
+            end,
+            ["Frost Fever"] = function()
+                return 1.6
+            end
+        }
+    },
+    [11] = { -- Druid
+        buffs = {},
+        [1] = {
+            buffs = { -- Balance
+                incarn = function()
+                    if UnitAura("player", "Incarnation: Chosen of Elune") and (UnitBuff("player", "Eclipse (Lunar)") or UnitBuff("player", "Eclipse (Solar)") or UnitBuff("player", "Celestial Alignment")) then
+                        return 1.25
+                    else
+                        return 1
+                    end
+                end,
+                moonkin = function()
+                    if UnitAura("player", "Moonkin Form") then
+                        return 1.1
+                    else
+                        return 1
+                    end
+                end,
+                doc = function() -- wip
+                    return 1
+                end
+            },
+            ["Moonfire"] = function()
+                return (select(15, UnitBuff("player", "Eclipse (Lunar)")) or select(15, UnitBuff("player", "Celestial Alignment")) or 0) / 100 + 1
+            end,
+            ["Sunfire"] = function()
+                return (select(15, UnitBuff("player", "Eclipse (Solar)")) or select(15, UnitBuff("player", "Celestial Alignment")) or 0) / 100 + 1
+            end
         }
     }
 }
@@ -91,7 +127,7 @@ local function getSpecificDmgMod(spellName)
             for _, dmgMod in pairs(specificDmgMods[class][spec].buffs) do
                 aggregate = aggregate * dmgMod()
             end
-            aggregate = aggregate * (specificDmgMods[class][spec][spellName] or 1)
+            aggregate = aggregate * (specificDmgMods[class][spec][spellName]() or 1)
         end
     end
     return aggregate
@@ -150,6 +186,28 @@ aura_env.dots = {
         icon = "Interface\\Icons\\Spell_DeathKnight_FrostFever",
         isHasteBased = false,
         isSpellPowerBased = false
+    },
+    [5] = {
+        baseDamage = 260,
+        multiplier = 0.24,
+        baseTickRate = 3,
+        baseDuration = 18.145,
+        school = 7,
+        name = "Moonfire",
+        icon = "Interface\\Icons\\Spell_Nature_StarFall",
+        isHasteBased = true,
+        isSpellPowerBased = true
+    },
+    [6] = {
+        baseDamage = 260,
+        multiplier = 0.24,
+        baseTickRate = 3,
+        baseDuration = 18.145,
+        school = 4,
+        name = "Sunfire",
+        icon = "Interface\\Icons\\Ability_Mage_FireStarter",
+        isHasteBased = true,
+        isSpellPowerBased = true
     }
 }
 
